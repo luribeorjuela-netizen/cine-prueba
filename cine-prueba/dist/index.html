@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>cine-prueba</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!-- Banner -->
+<div id="subBanner" class="sub-banner">
+  🎬 Suscríbete a Escena Secreta para más cine gratis
+  <button id="subBtn" class="btn">Suscribirme</button>
+</div>
+
+<!-- Modal -->
+<dialog id="subModal">
+  <form method="dialog" id="subForm">
+    <h2>📩 Únete a Escena Secreta</h2>
+    <p>Recibe estrenos de cine clásico gratis en tu correo.</p>
+    <input type="email" id="subEmail" placeholder="Tu email..." required />
+    <menu>
+      <button value="cancel">Cancelar</button>
+      <button type="submit">Suscribirme</button>
+    </menu>
+  </form>
+</dialog>
+
+<script>
+(function(){
+  const MC_API_KEY = "TU_API_KEY";  // ⚠️ Se guarda en servidor, no en frontend
+  const MC_LIST_ID = "TU_AUDIENCE_ID";
+  const DC = "us21"; // tu datacenter (ej: us21, us10...)
+
+  const subBtn=document.querySelector("#subBtn");
+  const subModal=document.querySelector("#subModal");
+  const subForm=document.querySelector("#subForm");
+  const subEmail=document.querySelector("#subEmail");
+
+  subBtn.addEventListener("click",()=>subModal.showModal());
+
+  subForm.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const email=subEmail.value.trim();
+    if(!email)return;
+
+    // Llamada a tu backend (proxy seguro) que maneja la API Key
+    const res=await fetch("https://TU_DOMINIO/api/subscribe",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ email })
+    });
+    if(res.ok){
+      alert("¡Suscripción confirmada! 🎉");
+      subModal.close();
+    }else{
+      alert("Error al suscribir. Intenta de nuevo.");
+    }
+  });
+})();
+</script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Escena Secreta</title>
+  <meta name="description" content="Escena Secreta - Cine, series y TV gratis con estilo retro.">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #eee;
+    }
+    header {
+      background: #222;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      color: #f39c12;
+    }
+    #movies {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .movie {
+      background: #222;
+      border-radius: 8px;
+      overflow: hidden;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .movie:hover {
+      transform: scale(1.05);
+    }
+    .movie img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+    }
+    .movie h3 {
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin: 0;
+    }
+    #loading {
+      text-align: center;
+      padding: 1rem;
+      color: #f39c12;
+    }
+  </style>
+</head>
+<body>
+  <header>🎬 Escena Secreta</header>
+  <main>
+    <section id="movies"></section>
+    <div id="loading">Cargando más películas...</div>
+  </main>
+
+  <script>
+    const API_KEY = "e4257a3d883f9627bd489d59ebe42883"; // tu clave TMDb
+    const BASE_URL = "https://api.themoviedb.org/3";
+    const IMG_URL = "https://image.tmdb.org/t/p/w500";
+
+    let page = 1;
+    let loading = false;
+
+    const moviesContainer = document.getElementById("movies");
+    const loadingDiv = document.getElementById("loading");
+
+    async function getMovies() {
+      if (loading) return;
+      loading = true;
+      loadingDiv.style.display = "block";
+
+      try {
+        const res = await fetch(
+          `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=es-ES&page=${page}`
+        );
+        const data = await res.json();
+        renderMovies(data.results);
+        page++;
+      } catch (err) {
+        console.error("Error cargando películas:", err);
+      } finally {
+        loading = false;
+        loadingDiv.style.display = "none";
+      }
+    }
+
+    function renderMovies(movies) {
+      movies.forEach(movie => {
+        const div = document.createElement("div");
+        div.classList.add("movie");
+        div.innerHTML = `
+          <img src="${movie.poster_path ? IMG_URL + movie.poster_path : "https://via.placeholder.com/300x450?text=No+Image"}" alt="${movie.title}">
+          <h3>${movie.title}</h3>
+        `;
+        moviesContainer.appendChild(div);
+      });
+    }
+
+    // Scroll infinito
+    window.addEventListener("scroll", () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+        getMovies();
+      }
+    });
+
+    // Carga inicial
+    getMovies();
+  </script>
+</body>
+</html>
+<div id="loadingBar" aria-hidden="true"></div>
+<header>
+  <div class="wrap nav" role="navigation" aria-label="Principal">
+    <a class="brand" href="#" aria-label="Inicio">
+      <span class="logo" aria-hidden="true"></span>
+      <span>Escena Secreta</span>
+    </a>
+    <form id="searchForm" class="search" role="search" aria-label="Buscar">
+      <input id="q" name="q" type="search" placeholder="Buscar películas o TV clásica…" autocomplete="off" aria-label="Escribe y presiona Enter">
+      <button class="btn" type="submit">Buscar</button>
+    </form>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button class="tab" role="tab" data-tab="trending" aria-selected="true">Tendencias</button>
+      <button class="tab" role="tab" data-tab="movies">Películas</button>
+      <button class="tab" role="tab" data-tab="series">Series / TV</button>
+      <button class="tab" role="tab" data-tab="watchlist">Mi lista</button>
+    </nav>
+    <div class="cta">
+      <button id="openSubscribe" class="btn">Suscríbete</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="results">
+    <div class="section">
+      <h2 id="sectionTitle">Tendencias</h2>
+      <div class="muted">Contenido de dominio público de <span class="pill">Internet Archive</span></div>
+    </div>
+    <div id="grid" class="grid" aria-live="polite"></div>
+    <div id="empty" class="empty" hidden>Sin resultados. 🤔</div>
+    <div id="sentinel"><div id="sentinelSpinner" class="spinner" hidden></div></div>
+  </section>
+</main>
+
+<footer>
+  Hecho con ❤️ para lo clásico. Solo contenido de <strong>dominio público</strong> / licencias abiertas. <br>
+  Tip: pulsa <span class="kbd">/</span> para buscar, <span class="kbd">Esc</span> para cerrar el reproductor.
+</footer>
+
+<!-- Modal Player -->
+<dialog id="player" aria-labelledby="playerTitle">
+  <div class="player-head">
+    <strong id="playerTitle">Reproductor</strong>
+    <div>
+      <button class="btn" id="openOnArchive" title="Ver en Internet Archive">Abrir en Archive</button>
+      <button class="btn" id="closePlayer" title="Cerrar (Esc)">Cerrar</button>
+    </div>
+  </div>
+  <div class="player-body">
+    <div class="player-grid">
+      <div>
+        <video id="video" controls playsinline preload="metadata" poster=""></video>
+        <div class="chooser" id="sourceChooser" aria-label="Calidades y archivos disponibles"></div>
+      </div>
+      <aside class="player-info">
+        <h3 id="playerMetaTitle">Título</h3>
+        <p id="playerMetaDesc" class="muted"></p>
+        <p class="muted">Fecha: <span id="playerDate">—</span></p>
+        <button class="btn save" id="saveFromPlayer">Añadir a Mi lista</button>
+      </aside>
+    </div>
+  </div>
+</dialog>
+
+<!-- Modal Suscripción -->
+<dialog id="subscribe" aria-labelledby="subscribeTitle">
+  <div class="sub-head">
+    <strong id="subscribeTitle">Únete a Escena Secreta</strong>
+    <button class="btn" id="closeSubscribe">Cerrar</button>
+  </div>
+  <div class="sub-body">
+    <p class="muted">Recibe estrenos clásicos y recomendaciones cada semana. Gratis.</p>
+    <form id="subscribeForm">
+      <input id="emailInput" type="email" required placeholder="tu@email.com">
+      <button class="btn" type="submit">Quiero suscribirme</button>
+    </form>
+  </div>
+  <div class="sub-foot">
+    <button class="linklike" id="exportCSV">Exportar emails (CSV)</button>
+    <button class="linklike" id="connectHelp">¿Conectar con Mailchimp/ConvertKit?</button>
+  </div>
+</dialog>
+
+<!-- Banner pegajoso -->
+<div id="subscribeBanner">
+  <div class="inner">
+    <span>🎬 Te mandamos lo mejor del cine clásico. ¿Te apuntas?</span>
+    <div style="display:flex; gap:8px">
+      <button class="btn" id="bannerSubscribeBtn">Suscribirme</button>
+      <button class="btn" id="bannerCloseBtn" aria-label="Cerrar">No ahora</button>
+    </div>
+  </div>
+</div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escena Secreta 🎬</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="loadingBar" aria-hidden="true"></div>
+  <header>
+    <div class="wrap nav" role="navigation" aria-label="Principal">
+      <a class="brand" href="#" aria-label="Inicio">
+        <span class="logo" aria-hidden="true"></span>
+        <span>Escena Secreta</span>
+      </a>
+      <form id="searchForm" class="search" role="search" aria-label="Buscar">
+        <input id="q" name="q" type="search" placeholder="Buscar películas o TV clásica…" autocomplete="off" aria-label="Escribe y presiona Enter">
+        <button class="btn" type="submit">Buscar</button>
+      </form>
+      <nav class="tabs" role="tablist" aria-label="Secciones">
+        <button class="tab" role="tab" data-tab="trending" aria-selected="true">Tendencias</button>
+        <button class="tab" role="tab" data-tab="movies">Películas</button>
+        <button class="tab" role="tab" data-tab="series">Series / TV</button>
+        <button class="tab" role="tab" data-tab="watchlist">Mi lista</button>
+      </nav>
+      <div class="cta">
+        <button id="openSubscribe" class="btn">Suscríbete</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="results">
+      <div class="section">
+        <h2 id="sectionTitle">Tendencias</h2>
+        <div class="muted">Contenido de dominio público de <span class="pill">Internet Archive</span></div>
+      </div>
+      <div id="grid" class="grid" aria-live="polite"></div>
+      <div id="empty" class="empty" hidden>Sin resultados. 🤔</div>
+      <div id="sentinel"><div id="sentinelSpinner" class="spinner" hidden></div></div>
+    </section>
+  </main>
+
+  <footer>
+    Hecho con ❤️ para lo clásico. Solo contenido de <strong>dominio público</strong> / licencias abiertas. <br>
+    Tip: pulsa <span class="kbd">/</span> para buscar, <span class="kbd">Esc</span> para cerrar el reproductor.
+  </footer>
+
+  <!-- Modal Player -->
+  <dialog id="player" aria-labelledby="playerTitle">
+    <div class="player-head">
+      <strong id="playerTitle">Reproductor</strong>
+      <div>
+        <button class="btn" id="openOnArchive" title="Ver en Internet Archive">Abrir en Archive</button>
+        <button class="btn" id="closePlayer" title="Cerrar (Esc)">Cerrar</button>
+      </div>
+    </div>
+    <div class="player-body">
+      <div class="player-grid">
+        <div>
+          <video id="video" controls playsinline preload="metadata" poster=""></video>
+          <div class="chooser" id="sourceChooser" aria-label="Calidades y archivos disponibles"></div>
+        </div>
+        <aside class="player-info">
+          <h3 id="playerMetaTitle">Título</h3>
+          <p id="playerMetaDesc" class="muted"></p>
+          <p class="muted">Fecha: <span id="playerDate">—</span></p>
+          <button class="btn save" id="saveFromPlayer">Añadir a Mi lista</button>
+        </aside>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal Suscripción -->
+  <dialog id="subscribe" aria-labelledby="subscribeTitle">
+    <div class="sub-head">
+      <strong id="subscribeTitle">Únete a Escena Secreta</strong>
+      <button class="btn" id="closeSubscribe">Cerrar</button>
+    </div>
+    <div class="sub-body">
+      <p class="muted">Recibe estrenos clásicos y recomendaciones cada semana. Gratis.</p>
+      <form id="subscribeForm">
+        <input id="emailInput" type="email" required placeholder="tu@email.com">
+        <button class="btn" type="submit">Quiero suscribirme</button>
+      </form>
+    </div>
+    <div class="sub-foot">
+      <button class="linklike" id="exportCSV">Exportar emails (CSV)</button>
+      <button class="linklike" id="connectHelp">¿Conectar con Mailchimp/ConvertKit?</button>
+    </div>
+  </dialog>
+
+  <!-- Banner pegajoso -->
+  <div id="subscribeBanner">
+    <div class="inner">
+      <span>🎬 Te mandamos lo mejor del cine clásico. ¿Te apuntas?</span>
+      <div style="display:flex; gap:8px">
+        <button class="btn" id="bannerSubscribeBtn">Suscribirme</button>
+        <button class="btn" id="bannerCloseBtn" aria-label="Cerrar">No ahora</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escena Secreta — Cine Clásico Gratis</title>
+  <meta name="description" content="Escena Secreta: cine y TV clásica de dominio público. Gratis y legal.">
+  <link rel="preconnect" href="https://archive.org">
+  <link rel="preconnect" href="https://api.themoviedb.org">
+</head>
+<body>
+  <div id="loadingBar" aria-hidden="true"></div>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="#"><span class="logo"></span><span>Escena Secreta</span></a>
+      <form id="searchForm" class="search">
+        <input id="searchInput" type="search" placeholder="Buscar…" autocomplete="off">
+        <button class="btn" type="submit">Buscar</button>
+      </form>
+      <nav class="tabs">
+        <button class="tab" data-tab="trending" aria-selected="true">Tendencias</button>
+        <button class="tab" data-tab="movies">Películas</button>
+        <button class="tab" data-tab="series">Series</button>
+        <button class="tab" data-tab="archive">Clásicos IA</button>
+        <button class="tab" data-tab="watchlist">Mi lista</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="results">
+      <div class="section">
+        <h2 id="sectionTitle">Tendencias</h2>
+        <div class="muted">Contenido desde <span class="pill">TMDb & Internet Archive</span></div>
+      </div>
+      <div id="grid" class="grid"></div>
+      <div id="empty" class="empty" hidden>Sin resultados 🤔</div>
+      <div id="sentinel"><div id="sentinelSpinner" class="spinner" hidden></div></div>
+    </section>
+  </main>
+
+  <footer>
+    Hecho con ❤️ para lo clásico. Todo de <strong>dominio público</strong> o trailers oficiales.  
+    <br> Pulsa <span class="kbd">/</span> para buscar, <span class="kbd">Esc</span> para cerrar el reproductor.
+  </footer>
+
+  <!-- Modal Player -->
+  <dialog id="player">
+    <div class="player-head">
+      <strong id="playerTitle">Reproductor</strong>
+      <button class="btn" id="closePlayer">Cerrar</button>
+    </div>
+    <div class="player-body">
+      <video id="playerVideo" controls></video>
+      <p id="playerDesc" class="muted"></p>
+    </div>
+  </dialog>
+
+  <!-- Banner Suscripción -->
+  <div id="subscribeBanner">
+    <div class="inner">
+      <span>🎬 Suscríbete para recibir clásicos gratis cada semana</span>
+      <button class="btn" id="bannerSubscribeBtn">Suscribirme</button>
+      <button class="btn" id="bannerCloseBtn">No ahora</button>
+    </div>
+  </div>
+</body>
+</html>
+<div id="loadingBar" aria-hidden="true"></div>
+<header> ... </header>
+<main> ... </main>
+<footer> ... </footer>
+<dialog id="player"> ... </dialog>
+<dialog id="subscribe"> ... </dialog>
+<div id="subscribeBanner"> ... </div>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Escena Secreta — Películas, Series & TV clásica</title>
+<meta name="description" content="Escena Secreta: cine y TV clásica de dominio público. Gratis y legal.">
+<meta property="og:title" content="Escena Secreta — Cine & TV clásica gratis">
+<meta property="og:description" content="Explora películas y TV clásicas de dominio público. Gratis y legal.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://archive.org/services/img/feature_films">
+<meta name="theme-color" content="#0b0d12">
+<div id="loadingBar" aria-hidden="true"></div>
+
+<header>
+  <div class="wrap nav" role="navigation" aria-label="Principal">
+    <a class="brand" href="#" aria-label="Inicio">
+      <span class="logo" aria-hidden="true"></span>
+      <span>Escena Secreta</span>
+    </a>
+    <form id="searchForm" class="search" role="search" aria-label="Buscar">
+      <input id="q" name="q" type="search" placeholder="Buscar películas o TV clásica…" autocomplete="off" aria-label="Escribe y presiona Enter">
+      <button class="btn" type="submit">Buscar</button>
+    </form>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button class="tab" role="tab" data-tab="trending" aria-selected="true">Tendencias</button>
+      <button class="tab" role="tab" data-tab="movies">Películas</button>
+      <button class="tab" role="tab" data-tab="series">Series / TV</button>
+      <button class="tab" role="tab" data-tab="watchlist">Mi lista</button>
+    </nav>
+    <div class="cta">
+      <button id="openSubscribe" class="btn">Suscríbete</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="results">
+    <div class="section">
+      <h2 id="sectionTitle">Tendencias</h2>
+      <div class="muted">Contenido de dominio público de <span class="pill">Internet Archive</span></div>
+    </div>
+    <div id="grid" class="grid" aria-live="polite"></div>
+    <div id="empty" class="empty" hidden>Sin resultados. 🤔</div>
+    <div id="sentinel"><div id="sentinelSpinner" class="spinner" hidden></div></div>
+  </section>
+</main>
+
+<footer>
+  Hecho con ❤️ para lo clásico. Solo contenido de <strong>dominio público</strong> / licencias abiertas. <br>
+  Tip: pulsa <span class="kbd">/</span> para buscar, <span class="kbd">Esc</span> para cerrar el reproductor.
+</footer>
+
+<!-- Modal Player -->
+<dialog id="player" aria-labelledby="playerTitle">
+  <div class="player-head">
+    <strong id="playerTitle">Reproductor</strong>
+    <div>
+      <button class="btn" id="openOnArchive" title="Ver en Internet Archive">Abrir en Archive</button>
+      <button class="btn" id="closePlayer" title="Cerrar (Esc)">Cerrar</button>
+    </div>
+  </div>
+  <div class="player-body">
+    <div class="player-grid">
+      <div>
+        <video id="video" controls playsinline preload="metadata" poster=""></video>
+        <div class="chooser" id="sourceChooser" aria-label="Calidades y archivos disponibles"></div>
+      </div>
+      <aside class="player-info">
+        <h3 id="playerMetaTitle">Título</h3>
+        <p id="playerMetaDesc" class="muted"></p>
+        <p class="muted">Fecha: <span id="playerDate">—</span></p>
+        <button class="btn save" id="saveFromPlayer">Añadir a Mi lista</button>
+      </aside>
+    </div>
+  </div>
+</dialog>
+
+<!-- Modal Suscripción -->
+<dialog id="subscribe" aria-labelledby="subscribeTitle">
+  <div class="sub-head">
+    <strong id="subscribeTitle">Únete a Escena Secreta</strong>
+    <button class="btn" id="closeSubscribe">Cerrar</button>
+  </div>
+  <div class="sub-body">
+    <p class="muted">Recibe estrenos clásicos y recomendaciones cada semana. Gratis.</p>
+    <form id="subscribeForm">
+      <input id="emailInput" type="email" required placeholder="tu@email.com">
+      <button class="btn" type="submit">Quiero suscribirme</button>
+    </form>
+  </div>
+  <div class="sub-foot">
+    <button class="linklike" id="exportCSV">Exportar emails (CSV)</button>
+    <button class="linklike" id="connectHelp">¿Conectar con Mailchimp/ConvertKit?</button>
+  </div>
+</dialog>
+
+<!-- Banner Suscripción -->
+<div id="subscribeBanner">
+  <div class="inner">
+    <span>🎬 Te mandamos lo mejor del cine clásico. ¿Te apuntas?</span>
+    <div style="display:flex; gap:8px">
+      <button class="btn" id="bannerSubscribeBtn">Suscribirme</button>
+      <button class="btn" id="bannerCloseBtn" aria-label="Cerrar">No ahora</button>
+    </div>
+  </div>
+</div>
+<!-- partial -->
+  <script type="module" src="./script.js"></script>
+
+</body>
+</html>
